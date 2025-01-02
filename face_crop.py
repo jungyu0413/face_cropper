@@ -141,7 +141,7 @@ def main():
     for dt in tqdm(video_df.iterrows()):
         vid_path = dt[1].path
         save_path = dt[1].path.replace('orgin_data', 'face_data')
-        detect_and_save_faces_optimized(vid_path, save_path)
+        detect_and_save_faces_with_landmark_tracking(vid_path, save_path)
 
 if __name__ == '__main__':
     main()
