@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
-import pandas as pd
 from retinaface import RetinaFace
 from scipy.spatial.distance import euclidean
 from tqdm import tqdm
+import pandas as pd
 
 def resize_image(img, max_width=640, max_height=480):
     """
@@ -15,32 +15,29 @@ def resize_image(img, max_width=640, max_height=480):
         img = cv2.resize(img, (int(width * scale), int(height * scale)))
     return img
 
-def get_closest_box(current_boxes, previous_box, max_distance=50):
+def get_most_similar_face(current_faces, reference_landmarks):
     """
-    Find the closest box to the previous box based on the center point distance.
+    Find the face with the most similar landmarks to the reference landmarks.
     """
-    previous_center = np.array([
-        (previous_box[0] + previous_box[2]) / 2,
-        (previous_box[1] + previous_box[3]) / 2
-    ])
     min_distance = float('inf')
-    best_box = None
+    best_face = None
 
-    for box in current_boxes:
-        current_center = np.array([
-            (box[0] + box[2]) / 2,
-            (box[1] + box[3]) / 2
-        ])
-        distance = euclidean(previous_center, current_center)
-        if distance < min_distance:
-            min_distance = distance
-            best_box = box
+    for face in current_faces:
+        landmarks = face['landmarks']
 
-    # If the closest box is too far, return None
-    if min_distance > max_distance:
-        return None
+        # Calculate distances for each key point
+        distances = [
+            euclidean(landmarks['left_eye'], reference_landmarks['left_eye']),
+            euclidean(landmarks['right_eye'], reference_landmarks['right_eye']),
+            euclidean(landmarks['nose'], reference_landmarks['nose']),
+        ]
+        current_distance = np.mean(distances)  # Use the mean distance for similarity
 
-    return best_box
+        if current_distance < min_distance:
+            min_distance = current_distance
+            best_face = face
+
+    return best_face
 
 def make_square_box(box, img_shape):
     """
@@ -62,9 +59,13 @@ def make_square_box(box, img_shape):
     y2_new = min(img_shape[0], cy + side // 2)
 
     return [x1_new, y1_new, x2_new, y2_new]
-def detect_and_save_faces_optimized(video_path, output_path, max_distance=50):
+
+def detect_and_save_faces_with_landmark_tracking(video_path, output_path):
+    """
+    Detect and save the face of a specific individual across a video.
+    """
     cap = cv2.VideoCapture(video_path)
-    previous_box = None
+    previous_landmarks = None
     frame_width, frame_height = None, None
 
     # 총 프레임 수 계산
@@ -75,14 +76,16 @@ def detect_and_save_faces_optimized(video_path, output_path, max_distance=50):
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     writer = None
 
-    # tqdm으로 진행률 표시
     with tqdm(total=total_frames, desc="Processing Frames") as pbar:
         while True:
             ret, img = cap.read()
             if not ret:
                 break
 
-            # 프레임 크기 초기화
+            # Resize image if necessary
+            img = resize_image(img)
+
+            # Initialize frame dimensions and video writer
             if frame_width is None or frame_height is None:
                 frame_height, frame_width = img.shape[:2]
                 writer = cv2.VideoWriter(output_path, fourcc, fps, (frame_width, frame_height))
@@ -92,32 +95,35 @@ def detect_and_save_faces_optimized(video_path, output_path, max_distance=50):
 
             if not resp:
                 print("No faces detected.")
-                if previous_box is not None:
-                    x1, y1, x2, y2 = previous_box
-                    cropped_face = img[y1:y2, x1:x2]
-                    resized_face = cv2.resize(cropped_face, (frame_width, frame_height))
-                    writer.write(resized_face)
                 pbar.update(1)
                 continue
 
-            # 가장 높은 확신도의 박스 또는 이전 박스와 가까운 박스 선택
-            boxes = [face_data['facial_area'] for face_data in resp.values()]
-            scores = [face_data['score'] for face_data in resp.values()]
-
-            if previous_box is None:
-                best_index = np.argmax(scores)
-                best_box = boxes[best_index]
+            faces = list(resp.values())
+            if previous_landmarks is None:
+                # 첫 프레임에서는 가장 높은 확신도의 얼굴 선택
+                best_face = max(faces, key=lambda x: x['score'])
             else:
-                best_box = get_closest_box(boxes, previous_box, max_distance=max_distance)
-                if best_box is None:
-                    best_box = previous_box
+                # 이전 프레임의 얼굴과 가장 유사한 얼굴 선택
+                best_face = get_most_similar_face(faces, previous_landmarks)
 
-            # 정사각형으로 박스 조정
-            best_box = make_square_box(best_box, img.shape)
-            previous_box = best_box
+            if best_face is None:
+                print("No matching face found.")
+                pbar.update(1)
+                continue
 
-            # 얼굴 자르기
-            x1, y1, x2, y2 = best_box
+            # 랜드마크 업데이트
+            previous_landmarks = best_face['landmarks']
+
+            # 얼굴 박스 크롭
+            box = best_face['facial_area']
+            x1, y1, x2, y2 = map(int, box)
+            cropped_face = img[y1:y2, x1:x2]
+
+            # 박스 정사각형으로 조정
+            cropped_face = make_square_box([x1, y1, x2, y2], img.shape)
+
+            # 얼굴 리사이즈 후 저장
+            x1, y1, x2, y2 = cropped_face
             cropped_face = img[y1:y2, x1:x2]
             resized_face = cv2.resize(cropped_face, (frame_width, frame_height))
             writer.write(resized_face)
