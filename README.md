@@ -1,17 +1,31 @@
-# Face Cropper Tool
+# Face Detection and Tracking in Video using RetinaFace and Face_Recognition
 
-This tool processes videos, detects faces frame by frame using the RetinaFace library, and saves cropped face regions as a new video.
+This repository provides a Python script to detect and track a specific individual's face in a video. The pipeline combines the **RetinaFace-pytorch** model for face detection and the **face_recognition** library for face identification based on a reference image. The script minimizes jitter and ID flip during tracking to ensure smooth face detection and consistent tracking.
+
+---
 
 ## Installation
 
-First, install the required dependencies:
+### Prerequisites
+- **Python 3.8 or later**
+- **GPU support with CUDA installed**
 
-```bash
-pip install retina-face opencv-python tqdm scipy matplotlib
+### Install Dependencies
 
-from your_script_name import detect_and_save_faces
+1. **Install the RetinaFace library**:
+   ```bash
+   pip install retinaface-pytorch
+   Reference: RetinaFace-Pytorch Documentation
+   
+2. **Install the face recognition library:**:
+   ```bash
+    pip install face_recognition
+    Reference: Face_Recognition GitHub
+   
+3. **Install other required libraries::**:
+   ```bash
+    pip install opencv-python numpy tqdm pillow pandas scipy
 
-video_path = "path/to/your/video.mp4"
-output_path = "path/to/save/cropped_faces.mp4"
+   
 
-detect_and_save_faces(video_path, output_path)
+
