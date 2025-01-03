@@ -67,7 +67,7 @@ def make_square_box(box, img_shape):
     return [x1_new, y1_new, x2_new, y2_new]
 
 
-def select_best_face_based_on_embedding(face_detector, faces, embedding, img, img_shape=None, score_weight=0.3, size_weight=0.2, embedding_weight=0.5):
+def select_best_face_based_on_embedding(face_recognition, faces, embedding, img, img_shape=None, score_weight=0.3, size_weight=0.2, embedding_weight=0.5):
     """
     임베딩 유사도, 신뢰도 점수, 박스 크기를 기반으로 가장 적합한 얼굴을 선택합니다.
     - 얼굴별로 임베딩을 계산하고 주어진 임베딩과 코사인 유사도를 평가합니다.
@@ -87,7 +87,7 @@ def select_best_face_based_on_embedding(face_detector, faces, embedding, img, im
 
         # 현재 얼굴의 임베딩 계산
         try:
-            face_embedding = face_detector.face_encodings(np.array(pil_face))[0]
+            face_embedding = face_recognition.face_encodings(np.array(pil_face))[0]
         except IndexError:
             # 임베딩 계산 불가능한 경우 건너뜀
             continue
@@ -116,7 +116,7 @@ def select_best_face_based_on_embedding(face_detector, faces, embedding, img, im
 
 
 
-def detect_and_save_faces_with_landmark_tracking(video_path, output_path, embedding, face_detector):
+def detect_and_save_faces_with_landmark_tracking(video_path, output_path, embedding, face_detector, face_recognition):
     """
     비디오에서 특정 개체의 얼굴을 탐지하고 저장합니다.
     - 첫 번째 프레임에서는 임베딩 기반 또는 가장 큰 박스와 높은 신뢰도 기반으로 얼굴을 선택합니다.
@@ -166,7 +166,7 @@ def detect_and_save_faces_with_landmark_tracking(video_path, output_path, embedd
                     continue
                 if embedding is not False:
                     # 임베딩 기반으로 얼굴 선택
-                    best_face = select_best_face_based_on_embedding(annotations, embedding, img, img_shape=img.shape)
+                    best_face = select_best_face_based_on_embedding(face_recognition, annotations, embedding, img, img_shape=img.shape)
                 else:
                     # 신뢰도가 높고 크기가 가장 큰 얼굴 선택
                     try:
