@@ -2,7 +2,7 @@ import face_recognition
 import pandas as pd
 import os
 from retinaface.pre_trained_models import get_model
-from utils import *
+from utils_face_crop import *
 
 
 def main():
@@ -12,7 +12,7 @@ def main():
     face_detector = get_model("resnet50_2020-07-20", max_size=2048)
     face_detector.eval()
 
-    for _, row in video_df.iterrows():
+    for _, row in video_df[14:15].iterrows():
         sample_img_path = row['path'].split('.')[0].replace('orgin_data', 'cropped_data') + '/00001.jpg'
         vid_path = row['path']
         save_path = row['path'].replace('orgin_data', 'face_data')
@@ -34,7 +34,7 @@ def main():
 
         try:
             # 비디오 처리
-            face_detected = detect_and_save_faces_with_landmark_tracking(vid_path, save_path, embedding, face_detector)
+            face_detected = detect_and_save_faces_with_landmark_tracking(vid_path, save_path, embedding, face_detector, face_recognition)
         except Exception as e:
             print(f"Error processing video: {vid_path}, {e}. Skipping video.")
             non_face_dt.append(row)
