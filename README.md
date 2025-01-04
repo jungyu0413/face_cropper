@@ -12,7 +12,7 @@ This repository provides a Python script to detect and track a specific individu
 
 ### Install Dependencies
 
-1. **Install the RetinaFace library**:
+1. TBD
    ```bash
    pip install retinaface-pytorch
    Reference: RetinaFace-Pytorch Documentation
