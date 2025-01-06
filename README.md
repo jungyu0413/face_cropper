@@ -12,10 +12,11 @@ This repository provides a Python script to detect and track a specific individu
 
 ### Install Dependencies
 
-1. **Install the RetinaFace library**:
+1. **Install the face detection:**
    ```bash
-   pip install retinaface-pytorch
-   Reference: RetinaFace-Pytorch Documentation
+   git clone https://github.com/biubug6/Pytorch_Retinaface.git
+   Pytorch version 1.1.0+ and torchvision 0.3.0+ are needed.
+   Codes are based on Python 3
    
 2. **Install the face recognition library:**:
    ```bash
