@@ -18,15 +18,23 @@ This repository provides a Python script to detect and track a specific individu
    Pytorch version 1.1.0+ and torchvision 0.3.0+ are needed.
    Codes are based on Python 3
    
-2. **Install the face recognition library:**:
+2. **Install the face recognition library:**
    ```bash
     pip install face_recognition
     Reference: Face_Recognition GitHub
    
-3. **Install other required libraries::**:
+3. **Install other required libraries:**
    ```bash
     pip install opencv-python numpy tqdm pillow pandas scipy
 
    
+4. **face recognition and detection:**
+If a reference image exists, specify the path in sample_img_path = ''. The script will parse and crop the face with the highest similarity to the reference image.
 
+   ```bash
+    python face_crop.py
 
+6. **video filter:**
+Provide a video file and a frame-wise annotation file, then specify the labels you want to parse. The script will filter and save clips that correspond to the specified labels.
+   ```bash
+    python face_crop.py
