@@ -38,3 +38,5 @@ If a reference image exists, specify the path in sample_img_path = ''. The scrip
 Provide a video file and a frame-wise annotation file, then specify the labels you want to parse. The script will filter and save clips that correspond to the specified labels.
    ```bash
     python face_crop.py
+
+   TBD
