@@ -39,4 +39,18 @@ Provide a video file and a frame-wise annotation file, then specify the labels y
    ```bash
     python face_crop.py
 
-   TBD
+
+
+
+
+### Issue report
+
+#### 1. ID flip : 영상 내의 대상자가 다수가 등장(초반 또는 중반)하는 경우
+      1) threshold를 기준으로 초반 프레임에서 등장하는 다수의 얼굴을 인식 및 임베딩 저장 이후 트래킹하는 방식.
+      2) 일정하게 지속적으로 등장하는 사람의 얼굴만 크롭 및 저장.
+#### 2. Black frame : 초반의 해상도, 밝기가 0에 수렴하는 경우
+      1) 1번의 방식으로 해결 가능.
+#### 3. Non Frontalization : 얼굴이 옆면 또는 뒷면을 보는 경우
+      1) 옆면 임베딩과 뒷면 임베딩의 차이를 확인.
+#### 4. Non Same size box : 얼굴을 크롭하는 박스의 사이즈가 다른 경우
+      1) 전체 프레임에서 코를 중점으로 잡아서 눈 입의 위치를 일정한 비율로 잡도록 설정.
